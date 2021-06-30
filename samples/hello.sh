@@ -1,3 +1,4 @@
+#USE install.sh instead. 
 sudo apt update
 sudo apt-add-repository -y ppa:mosquitto-dev/mosquitto-ppa    
 sudo apt-get update

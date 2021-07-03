@@ -5,8 +5,6 @@
 #include <time.h>
 #include "sqlite3.h"
 
-
-
 #define ADDRESS     "tcp://localhost:2020"
 #define CLIENTID    "ExampleClientPub"
 #define CLIENTID1    "ExampleClientPub1"
@@ -14,14 +12,12 @@ char* TOPIC="log/#";
 #define QOS         1
 #define TIMEOUT     10000L
 
-
 int disc_finished = 0;
 int subscribed = 0;
 int finished = 0;
 char* msg;
 char* logm;
 char* time1;
-
 
 volatile MQTTAsync_token deliveredtoken;
 int payloadSendFlag=0;
@@ -53,13 +49,11 @@ void stringParse(char* mesg){
         }
    
 }
-
 void time_convert(char* message,int* unix1,int* unix2)
 {
 struct tm t;
 time_t t_of_day;
 int hr,mint,secnd,yr,mnth,dy;
-
 char str[100];
 strcpy(str,message);
    const char s[] = "<;>";
@@ -78,7 +72,6 @@ strcpy(str,message);
    printf( "Output2= %s\n", t2 );
    while(flag<2)
    {
-       
       if(flag==0)
    {
        oper=t1;
@@ -87,7 +80,6 @@ strcpy(str,message);
    {
        oper=t2;
    }
-   
        token=strtok(oper,":");
        hr=atoi(token);
        token=strtok(NULL,":");
@@ -96,7 +88,7 @@ strcpy(str,message);
        secnd=atoi(token);
        token=strtok(NULL,":");
        yr=atoi(token);
-      token=strtok(NULL,":");
+       token=strtok(NULL,":");
        mnth=atoi(token);
        token=strtok(NULL,":");
        dy=atoi(token);
@@ -109,7 +101,6 @@ strcpy(str,message);
     t.tm_isdst = -1;        // Is DST on? 1 = yes, 0 = no, -1 = unknown
     t_of_day = timegm(&t);
 	printf("hour %d\n",hr);
-    
       if(flag==0)
    {
        *unix1=(long)t_of_day;
@@ -123,7 +114,6 @@ strcpy(str,message);
    flag++;
    }  
 }
-
 
 //FIXME: 
 //TODO: 
@@ -155,7 +145,6 @@ int callbackfn(void *NotUsed, int argc, char **argv, char **azColName)
              }
     }
       
-	
  payloadSendFlag=1;
  return 0;
 }
@@ -197,7 +186,7 @@ int sqlInsert (char *logTime ,char* SensorName, char* logm) {
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
-        sprintf(sqlQ, "INSERT INTO Sensors(UTCtime,HRtime,SensorName,logMgs)VALUES(%ld,\'%s\',\'%s\',\'%s\');",utcT,logTime,SensorName,logm);
+        sprintf(sqlQ,"CREATE TABLE IF NOT EXISTS Sensors(UTCtime LONG, HRtime TEXT,SensorName TEXT,logMgs TEXT);" "INSERT INTO Sensors(UTCtime,HRtime,SensorName,logMgs)VALUES(%ld,\'%s\',\'%s\',\'%s\');",utcT,logTime,SensorName,logm);
 		
         rc = sqlite3_exec(db, sqlQ, 0, 0, &err_msg);
         if (rc != SQLITE_OK ) {
@@ -208,8 +197,6 @@ int sqlInsert (char *logTime ,char* SensorName, char* logm) {
  }
  return 0;
  }
-
-
 
 void connlost(void *context, char *cause)
 {
@@ -244,9 +231,7 @@ int recievedMgs(void *context, char *topicName, int topicLen, MQTTAsync_message 
           strcpy(msg1,msg);
           strcpy(log2,logm);
           strcpy(time2,time1);
-          sqlInsert(time2,msg1,log2);
-		  
-
+          sqlInsert(time2,msg1,log2);	  
         }       //SQl insert function
         if (!strcmp(topicName,"log/get"))
         {
@@ -259,8 +244,6 @@ int recievedMgs(void *context, char *topicName, int topicLen, MQTTAsync_message 
     MQTTAsync_free(topicName);
         return 1;
 }
-
-
 void onDisconnect(void* context, MQTTAsync_successData* response)
 {
         printf("Successful disconnection\n");
@@ -294,7 +277,6 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response)
         printf("Connect failed, rc %d\n", response ? response->code : 0);
         finished = 1;
 }
-
 void onConnect(void* context, MQTTAsync_successData* response)
 {
         MQTTAsync client = (MQTTAsync)context;
@@ -314,54 +296,39 @@ void onConnect(void* context, MQTTAsync_successData* response)
                 printf("Failed to start subscribe, return code %d\n", rc);
                 exit(EXIT_FAILURE);
         }
-	
-
 }
 void onConnect1(void* context, MQTTAsync_successData* response)
 {
         MQTTAsync client1 = (MQTTAsync)context;
         printf("Successful connection\n");
-
-        
-     
-
 }
-
-
-
 int main(int argc, char* argv[])
 {
 	setbuf(stdout, NULL);
-    printf("c program started----->\n");
+   printf("\n\tC PROGRAM STARTED SUCCESSFULLY----->\n");
    MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
    MQTTAsync_disconnectOptions disc_opts = MQTTAsync_disconnectOptions_initializer;
-   
-  
    MQTTAsync_connectOptions conn_opts1 = MQTTAsync_connectOptions_initializer;
    MQTTAsync_disconnectOptions disc_opts1 = MQTTAsync_disconnectOptions_initializer;
-
-   
    int rc;
    int ch;
+   
    MQTTAsync_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
    MQTTAsync_setCallbacks(client, NULL, connlost, recievedMgs, NULL);
-
    conn_opts.keepAliveInterval = 20;
    conn_opts.cleansession = 1;
    conn_opts.onSuccess = onConnect;
    conn_opts.onFailure = onConnectFailure;
    conn_opts.context = client;
-   
-   
+	
    MQTTAsync_create(&client1, ADDRESS, CLIENTID1, MQTTCLIENT_PERSISTENCE_NONE, NULL);
    MQTTAsync_setCallbacks(client1, NULL, connlost, recievedMgs, NULL);
-
    conn_opts1.keepAliveInterval = 20;
    conn_opts1.cleansession = 1;
    conn_opts1.onSuccess = onConnect1;
    conn_opts1.onFailure = onConnectFailure;
    conn_opts1.context = client1;
-
+	
    if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
         {
                 printf("Failed to start connect, return code %d\n", rc);
@@ -372,8 +339,6 @@ int main(int argc, char* argv[])
                 printf("Failed to start connect, return code %d\n", rc);
                exit(EXIT_FAILURE);
         } 
-		
-
 #if 0
            while   (!subscribed)
                 #if defined(WIN32) || defined(WIN64)
@@ -383,17 +348,13 @@ int main(int argc, char* argv[])
                 #endif
         if (finished)
                 goto exit;
-#endif		
-			
+#endif				
         do
         {
-                ch = getchar();
-	   
-				
-				
+                ch = getchar();			
         } while (ch!='Q' && ch != 'q');
         disc_opts.onSuccess = onDisconnect;
-		disc_opts1.onSuccess = onDisconnect;
+	disc_opts1.onSuccess = onDisconnect;
         if ((rc = MQTTAsync_disconnect(client, &disc_opts)) != MQTTASYNC_SUCCESS)
         {
                 printf("Failed to start disconnect, return code %d\n", rc);

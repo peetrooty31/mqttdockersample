@@ -8,7 +8,7 @@
 
 
 
-#define ADDRESS     "tcp://localhost:2020"
+#define ADDRESS     "ssl://localhost:8883"
 #define CLIENTID    "ExampleClientPub"
 #define CLIENTID1    "ExampleClientPub1"
 char* TOPIC="log/#";
@@ -188,9 +188,8 @@ int sqlInsert (char *logTime ,char* SensorName, char* logm) {
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
-      
-sprintf(sqlQ,"CREATE TABLE IF NOT EXISTS Sensors(UTCtime LONG, HRtime TEXT,SensorName TEXT,logMgs TEXT);" "INSERT INTO Sensors(UTCtime,HRtime,SensorName,logMgs)VALUES(%ld,\'%s\',\'%s\',\'%s\');",utcT,logTime,SensorName,logm);
-			
+        sprintf(sqlQ, "INSERT INTO Sensors(UTCtime,HRtime,SensorName,logMgs)VALUES(%ld,\'%s\',\'%s\',\'%s\');",utcT,logTime,SensorName,logm);
+		
         rc = sqlite3_exec(db, sqlQ, 0, 0, &err_msg);
         if (rc != SQLITE_OK ) {
                 fprintf(stderr, "SQL error: %s\n", err_msg);
@@ -320,7 +319,7 @@ int main(int argc, char* argv[])
 	setbuf(stdout, NULL);
     printf("c program started----->\n");
 	printf("waiting to connect to broker...........");
-	sleep(10);
+	sleep(1);
 		
    MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
    MQTTAsync_disconnectOptions disc_opts = MQTTAsync_disconnectOptions_initializer;
@@ -328,6 +327,8 @@ int main(int argc, char* argv[])
  
    MQTTAsync_connectOptions conn_opts1 = MQTTAsync_connectOptions_initializer;
    MQTTAsync_disconnectOptions disc_opts1 = MQTTAsync_disconnectOptions_initializer;
+   
+   MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
 
    
    int rc;
@@ -351,6 +352,16 @@ int main(int argc, char* argv[])
    conn_opts1.onSuccess = onConnect1;
    conn_opts1.onFailure = onConnectFailure;
    conn_opts1.context = client1;
+   
+    conn_opts.ssl = &ssl_opts;
+	conn_opts1.ssl = &ssl_opts;
+	
+	ssl_opts.trustStore="./CA/ca.crt.pem";
+    ssl_opts.keyStore="./Client/client.crt.pem";
+    ssl_opts.privateKey="./Client/client.key.pem"; 
+	ssl_opts.enableServerCertAuth = 1;
+	
+	
 
    if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
         {

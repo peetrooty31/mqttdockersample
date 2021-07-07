@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 broker_address="localhost"
 broker_port=8883
 client = mqtt.Client("P1") 
-client.tls_set(ca_certs="../ca.crt.pem", certfile="../client.crt.pem", keyfile="../client.key.pem", cert_reqs=ssl.CERT_REQUIRED,tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+client.tls_set(ca_certs="./CA/ca.crt.pem", certfile="./Client/client.crt.pem", keyfile="./Client/client.key.pem", cert_reqs=ssl.CERT_REQUIRED,tls_version=ssl.PROTOCOL_TLS, ciphers=None)
 client.connect(broker_address,broker_port) 
 while True:
 	d= datetime.utcnow()

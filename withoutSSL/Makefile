@@ -1,14 +1,14 @@
 CC = gcc
 
-INCLUDES = -L../sqlite-amalgamation
+INCLUDES = -L/app/sqlite-amalgamation
 
 CFLAGS = -g -Wall 
 
-LDFLAGS = -L../paho.mqtt.c/build/output
+LDFLAGS = -L/app/paho.mqtt.c/build/output
 
 TARGET=pubsub
 	
-pubsub:	pubsub3.o .../paho.mqtt.c/build/output .../sqlite-amalgamation
+pubsub:	pubsub3.o /app/paho.mqtt.c/build/output /app/sqlite-amalgamation
 	$(CC) pubsub3.o $(LDFLAGS) -lpaho-mqtt3a $(INCLUDES) -lsqlite3 -o pubsub
 	
 pubsub.o:	pubsub3.c 

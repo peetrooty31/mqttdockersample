@@ -188,7 +188,7 @@ int sqlInsert (char *logTime ,char* SensorName, char* logm) {
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
-        sprintf(sqlQ, "INSERT INTO Sensors(UTCtime,HRtime,SensorName,logMgs)VALUES(%ld,\'%s\',\'%s\',\'%s\');",utcT,logTime,SensorName,logm);
+        sprintf(sqlQ, "CREATE TABLE IF NOT EXISTS Sensors (UTCtime long,HRtime Text,SensorName text,logMgs text);INSERT INTO Sensors(UTCtime,HRtime,SensorName,logMgs)VALUES(%ld,\'%s\',\'%s\',\'%s\');",utcT,logTime,SensorName,logm);
 		
         rc = sqlite3_exec(db, sqlQ, 0, 0, &err_msg);
         if (rc != SQLITE_OK ) {

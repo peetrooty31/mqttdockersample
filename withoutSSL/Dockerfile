@@ -2,7 +2,7 @@ FROM ubuntu:latest
 WORKDIR /app
 COPY install.sh /app
 RUN /app/install.sh
-COPY install.sh /app/install/new/new
+COPY install.sh /app/new/new
 RUN git clone https://github.com/peetrooty31/mqttdockersample.git 
 WORKDIR /app/mqttdockersample/withoutSSL 
 RUN make 
